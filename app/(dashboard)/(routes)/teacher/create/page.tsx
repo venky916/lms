@@ -1,12 +1,10 @@
 "use client";
 import React from "react";
 import * as z from "zod";
-import axios from "axios";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { useRouter } from "next/navigation";
 import { useToast } from "@/hooks/use-toast";
-
 
 import {
   Form,
@@ -20,14 +18,15 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import Link from "next/link";
+import { createCourse } from "@/actions/course.action";
 
 const formSchema = z.object({
   title: z.string().min(1, { message: "Title is Required" }),
 });
 
 const CreatePage = () => {
-    const router = useRouter();
-     const { toast } = useToast();
+  const router = useRouter();
+  const { toast } = useToast();
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -36,15 +35,24 @@ const CreatePage = () => {
   });
   const { isSubmitting, isValid } = form.formState;
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
-        try {
-            const response = await axios.post("");
-            router.push(`/teacher/courses/${response.data.id}`)
-        } catch (error) {
-            // console.log("Something went wrong")
-             toast({
-               description: "Something went wrong",
-             });
-        }
+    try {
+      const response = await createCourse(values);
+      if (response.success) {
+        const course = response.course;
+        router.push(`/teacher/courses/${course?.id}`);
+        toast({
+          description: "Course created Successfully",
+        });
+      }
+      toast({
+        description: response?.error,
+      });
+    } catch (error) {
+      // console.log("Something went wrong")
+      toast({
+        description: "Something went wrong",
+      });
+    }
   };
   return (
     <div className="max-w-5xl mx-auto flex md:items-center md:justify-center h-full p-6 ">

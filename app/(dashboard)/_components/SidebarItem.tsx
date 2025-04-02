@@ -14,7 +14,7 @@ interface SidebarItemProps {
 const SidebarItem = ({ icon: Icon, href, label }: SidebarItemProps) => {
   const pathname = usePathname();
   const router = useRouter();
-  console.log(pathname);
+  
   const isActive =
     (pathname === href && href === "/") ||
     pathname === href ||
