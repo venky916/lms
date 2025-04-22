@@ -2,6 +2,7 @@
 
 import { db } from "@/lib/db";
 import { auth } from "@clerk/nextjs/server";
+import { Course } from "@prisma/client";
 
 interface CreateCourseProps {
   title: string;
@@ -20,5 +21,28 @@ export async function createCourse(formData: CreateCourseProps) {
   } catch (e: any) {
     console.error("[COURSES]", e);
     return { error: e.message || "Something went wrong" };
+  }
+}
+
+export async function updateCourse(values: Partial<Course>, courseId: string) {
+  try {
+    const { userId } = await auth();
+
+    if (!userId) throw new Error("Unauthorized");
+
+    const course = await db.course.update({
+      where: {
+        id: courseId,
+        userId,
+      },
+      data: {
+        ...values,
+      },
+    });
+
+    return { success: true, course };
+  } catch (error: any) {
+    console.log("[courseId]", error);
+    return { error: error.message || "Internal Error" };
   }
 }
